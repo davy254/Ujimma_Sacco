@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -626,7 +626,7 @@
   <hr class="dash-divider">
 
   <!-- FEEDBACK -->
-  <div class="section-heading">User Feedback</div>
+  <div class="section-heading">Feedback To User. To be sent via SMS or Email.</div>
   <div class="feedback-card mb-5">
     <div class="agent-icon-wrap">💬</div>
     <div>
@@ -660,7 +660,7 @@
   /* ── THEME TOGGLE ── */
   const html        = document.documentElement;
   const toggleBtn   = document.getElementById('themeToggle');
-  const savedTheme  = localStorage.getItem('ujima-theme') || 'dark';
+  const savedTheme  = localStorage.getItem('ujima-theme') || 'light';
   html.setAttribute('data-theme', savedTheme);
 
   toggleBtn.addEventListener('click', () => {
