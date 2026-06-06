@@ -1,31 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ujima AI Loan Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
   <style>
+    /* ── THEME TOKENS ── */
     :root {
-      --bg:        #0d1117;
-      --surface:   #161b22;
-      --surface2:  #1f2937;
-      --border:    rgba(255,255,255,0.07);
-      --text:      #e6edf3;
-      --muted:     #8b949e;
+      --transition: 0.25s ease;
+    }
 
-      --scout:     #0ea5e9;
-      --scout-dim: rgba(14,165,233,0.12);
-      --guardian:  #a78bfa;
-      --guardian-dim: rgba(167,139,250,0.12);
-      --hunter:    #34d399;
-      --hunter-dim: rgba(52,211,153,0.12);
-      --feedback:  #fb923c;
-      --feedback-dim: rgba(251,146,60,0.12);
+    [data-theme="dark"] {
+      --bg:           #0d1117;
+      --bg-pattern:   rgba(255,255,255,0.025);
+      --surface:      #161b22;
+      --surface2:     #1f2937;
+      --surface3:     #252d38;
+      --border:       rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.18);
+      --text:         #e6edf3;
+      --muted:        #8b949e;
+      --muted2:       #555f6a;
 
-      --approved:  #34d399;
-      --rejected:  #f87171;
-      --accent:    #f59e0b;
+      --scout:        #38bdf8;
+      --scout-dim:    rgba(56,189,248,0.10);
+      --guardian:     #c4b5fd;
+      --guardian-dim: rgba(196,181,253,0.10);
+      --hunter:       #34d399;
+      --hunter-dim:   rgba(52,211,153,0.10);
+      --feedback:     #fb923c;
+      --feedback-dim: rgba(251,146,60,0.10);
+
+      --approved:     #34d399;
+      --rejected:     #f87171;
+      --accent:       #f59e0b;
+      --accent2:      #fb923c;
+      --blue:         #60a5fa;
+
+      --toggle-bg:    #1f2937;
+      --toggle-icon:  #f59e0b;
+      --card-shadow:  none;
+    }
+
+    [data-theme="light"] {
+      --bg:           #f5f6fa;
+      --bg-pattern:   rgba(0,0,0,0.03);
+      --surface:      #ffffff;
+      --surface2:     #f0f2f7;
+      --surface3:     #e8eaf0;
+      --border:       rgba(0,0,0,0.09);
+      --border-hover: rgba(0,0,0,0.20);
+      --text:         #111827;
+      --muted:        #6b7280;
+      --muted2:       #9ca3af;
+
+      --scout:        #0284c7;
+      --scout-dim:    rgba(2,132,199,0.07);
+      --guardian:     #7c3aed;
+      --guardian-dim: rgba(124,58,237,0.07);
+      --hunter:       #059669;
+      --hunter-dim:   rgba(5,150,105,0.07);
+      --feedback:     #ea580c;
+      --feedback-dim: rgba(234,88,12,0.07);
+
+      --approved:     #059669;
+      --rejected:     #dc2626;
+      --accent:       #d97706;
+      --accent2:      #ea580c;
+      --blue:         #2563eb;
+
+      --toggle-bg:    #e8eaf0;
+      --toggle-icon:  #7c3aed;
+      --card-shadow:  0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -35,72 +83,204 @@
       color: var(--text);
       font-family: 'DM Sans', sans-serif;
       min-height: 100vh;
-      /* subtle grid texture */
       background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+        linear-gradient(var(--bg-pattern) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-pattern) 1px, transparent 1px);
       background-size: 40px 40px;
+      transition: background var(--transition), color var(--transition);
     }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem 0;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--approved);
+    }
+
+    .pulse-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--approved);
+      flex-shrink: 0;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
+      50%       { opacity: 0.8; box-shadow: 0 0 0 5px rgba(52,211,153,0); }
+    }
+
+    /* ── THEME TOGGLE ── */
+    .theme-toggle {
+      background: var(--toggle-bg);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      width: 68px; height: 34px;
+      cursor: pointer;
+      position: relative;
+      transition: background var(--transition), border-color var(--transition);
+      flex-shrink: 0;
+      outline: none;
+    }
+    .theme-toggle:focus-visible {
+      box-shadow: 0 0 0 3px rgba(245,158,11,0.35);
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 4px; left: 4px;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border-hover);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: transform var(--transition), background var(--transition);
+      line-height: 1;
+    }
+
+    [data-theme="light"] .toggle-thumb {
+      transform: translateX(34px);
+    }
+
+    .toggle-icons {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px;
+      pointer-events: none;
+    }
+    .toggle-icons span {
+      font-size: 12px;
+      opacity: 0.4;
+    }
+    [data-theme="dark"]  .toggle-icons span:last-child  { opacity: 0; }
+    [data-theme="light"] .toggle-icons span:first-child { opacity: 0; }
 
     /* ── HEADER ── */
     .dash-header {
       text-align: center;
-      padding: 2.5rem 1rem 1.5rem;
+      padding: 1.75rem 1rem 1.5rem;
     }
-    .dash-header .brand {
+
+    .brand {
       font-family: 'Syne', sans-serif;
       font-weight: 800;
-      font-size: clamp(1.6rem, 4vw, 2.6rem);
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #f59e0b 0%, #fb923c 50%, #f87171 100%);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 55%, var(--rejected) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    .dash-header .subtitle {
+
+    .subtitle {
       color: var(--muted);
-      font-size: 0.9rem;
-      margin-top: 0.25rem;
-      letter-spacing: 0.08em;
+      font-size: 0.82rem;
+      margin-top: 0.4rem;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
     }
 
     /* ── METRIC CARDS ── */
-    .metric-row { gap: 1rem; }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+      .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    }
 
     .metric-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 1.25rem 1rem;
-      text-align: center;
-      transition: transform 0.2s, border-color 0.2s;
+      padding: 1.1rem 1rem 1rem;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s, background var(--transition);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
     }
+
+    .metric-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 0 0 14px 14px;
+      opacity: 0.7;
+    }
+    .metric-card.total::after    { background: var(--accent); }
+    .metric-card.approved::after { background: var(--approved); }
+    .metric-card.rejected::after { background: var(--rejected); }
+    .metric-card.time::after     { background: var(--blue); }
+
     .metric-card:hover {
       transform: translateY(-3px);
-      border-color: rgba(255,255,255,0.15);
+      border-color: var(--border-hover);
     }
-    .metric-card .metric-label {
-      font-size: 0.7rem;
+
+    .metric-icon {
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      display: block;
+      opacity: 0.7;
+    }
+
+    .metric-label {
+      font-size: 0.68rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--muted);
-      margin-bottom: 0.4rem;
+      margin-bottom: 0.25rem;
     }
-    .metric-card .metric-value {
+
+    .metric-value {
       font-family: 'Syne', sans-serif;
       font-size: 2rem;
       font-weight: 700;
       line-height: 1;
+      transition: color var(--transition);
     }
-    .metric-card.total  .metric-value { color: var(--accent); }
+
+    .metric-card.total    .metric-value { color: var(--accent); }
     .metric-card.approved .metric-value { color: var(--approved); }
     .metric-card.rejected .metric-value { color: var(--rejected); }
-    .metric-card.time    .metric-value { color: #60a5fa; }
+    .metric-card.time     .metric-value { color: var(--blue); }
 
     /* ── APPLY BUTTON ── */
     .btn-apply {
-      background: linear-gradient(135deg, #f59e0b, #fb923c);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
       border: none;
       border-radius: 10px;
       color: #0d1117;
@@ -108,8 +288,11 @@
       font-weight: 700;
       font-size: 0.95rem;
       letter-spacing: 0.04em;
-      padding: 0.75rem 2rem;
+      padding: 0.8rem 2.25rem;
       transition: opacity 0.2s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .btn-apply:hover {
       opacity: 0.9;
@@ -117,94 +300,113 @@
       color: #0d1117;
     }
 
-    /* ── MODAL ── */
-    .modal-content {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      color: var(--text);
-    }
-    .modal-header {
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-header h5 {
-      font-family: 'Syne', sans-serif;
-      font-weight: 700;
-    }
-    .btn-close { filter: invert(1); }
-    iframe {
-      width: 100%;
-      height: 600px;
-      border: none;
-      border-radius: 8px;
-    }
-
     /* ── SECTION HEADING ── */
     .section-heading {
       font-family: 'Syne', sans-serif;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--muted2);
       margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-heading::before {
+      content: '';
+      width: 18px; height: 2px;
+      background: var(--muted2);
+      border-radius: 2px;
+      flex-shrink: 0;
     }
 
-    /* ── AGENT CARDS (stacked) ── */
-    .agent-stack { display: flex; flex-direction: column; gap: 0.85rem; }
+    /* ── AGENT CARDS ── */
+    .agent-stack { display: flex; flex-direction: column; gap: 0.75rem; }
 
     .agent-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 1.1rem 1.25rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      transition: transform 0.2s, border-color 0.2s;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0 1rem;
+      transition: transform 0.2s, border-color 0.2s, background var(--transition);
       position: relative;
       overflow: hidden;
+      box-shadow: var(--card-shadow);
     }
+
     .agent-card::before {
       content: '';
       position: absolute;
-      inset: 0;
-      opacity: 0;
-      transition: opacity 0.3s;
+      top: 0; left: 0;
+      width: 3px; bottom: 0;
+      border-radius: 3px 0 0 3px;
     }
-    .agent-card:hover { transform: translateX(4px); }
 
-    /* coloured left border + glow */
-    .agent-card.scout  { border-left: 3px solid var(--scout);    background: linear-gradient(135deg, var(--scout-dim) 0%, var(--surface) 60%); }
-    .agent-card.guardian { border-left: 3px solid var(--guardian); background: linear-gradient(135deg, var(--guardian-dim) 0%, var(--surface) 60%); }
-    .agent-card.hunter { border-left: 3px solid var(--hunter);   background: linear-gradient(135deg, var(--hunter-dim) 0%, var(--surface) 60%); }
+    .agent-card.scout::before    { background: var(--scout); }
+    .agent-card.guardian::before { background: var(--guardian); }
+    .agent-card.hunter::before   { background: var(--hunter); }
 
-    .agent-card:hover { border-color: rgba(255,255,255,0.15); }
-    .agent-card.scout:hover   { border-left-color: var(--scout); }
-    .agent-card.guardian:hover{ border-left-color: var(--guardian); }
-    .agent-card.hunter:hover  { border-left-color: var(--hunter); }
+    .agent-card.scout    { background: linear-gradient(135deg, var(--scout-dim) 0%, var(--surface) 55%); }
+    .agent-card.guardian { background: linear-gradient(135deg, var(--guardian-dim) 0%, var(--surface) 55%); }
+    .agent-card.hunter   { background: linear-gradient(135deg, var(--hunter-dim) 0%, var(--surface) 55%); }
 
-    .agent-icon {
-      font-size: 1.5rem;
-      line-height: 1;
+    .agent-card:hover {
+      transform: translateX(4px);
+      border-color: var(--border-hover);
+    }
+
+    .agent-icon-wrap {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
       flex-shrink: 0;
-      margin-top: 0.1rem;
+      align-self: start;
     }
-    .agent-body { flex: 1; min-width: 0; }
+
+    .scout    .agent-icon-wrap { background: var(--scout-dim); }
+    .guardian .agent-icon-wrap { background: var(--guardian-dim); }
+    .hunter   .agent-icon-wrap { background: var(--hunter-dim); }
+
+    .agent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+
     .agent-title {
       font-family: 'Syne', sans-serif;
       font-weight: 700;
-      font-size: 0.85rem;
-      letter-spacing: 0.05em;
-      margin-bottom: 0.35rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      margin: 0;
     }
-    .agent-card.scout    .agent-title { color: var(--scout); }
-    .agent-card.guardian .agent-title { color: var(--guardian); }
-    .agent-card.hunter   .agent-title { color: var(--hunter); }
+    .scout    .agent-title { color: var(--scout); }
+    .guardian .agent-title { color: var(--guardian); }
+    .hunter   .agent-title { color: var(--hunter); }
+
+    .agent-status {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-weight: 500;
+    }
+
+    .scout    .agent-status { background: var(--scout-dim);    color: var(--scout); }
+    .guardian .agent-status { background: var(--guardian-dim); color: var(--guardian); }
+    .hunter   .agent-status { background: var(--hunter-dim);   color: var(--hunter); }
 
     .agent-text {
-      font-size: 0.88rem;
+      font-size: 0.875rem;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.65;
       margin: 0;
       white-space: pre-wrap;
       word-break: break-word;
@@ -212,136 +414,227 @@
 
     /* ── FEEDBACK CARD ── */
     .feedback-card {
-      background: var(--surface);
+      background: linear-gradient(135deg, var(--feedback-dim) 0%, var(--surface) 55%);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--feedback);
       border-radius: 14px;
       padding: 1.1rem 1.25rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      background: linear-gradient(135deg, var(--feedback-dim) 0%, var(--surface) 60%);
-      transition: transform 0.2s;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0 1rem;
+      transition: transform 0.2s, border-color 0.2s, background var(--transition);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
     }
-    .feedback-card:hover { transform: translateX(4px); }
-    .feedback-card .agent-title { color: var(--feedback); }
-    .feedback-card .agent-text  { color: var(--muted); }
+    .feedback-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; bottom: 0;
+      background: var(--feedback);
+      border-radius: 3px 0 0 3px;
+    }
+    .feedback-card:hover { transform: translateX(4px); border-color: var(--border-hover); }
+    .feedback-card .agent-icon-wrap { background: var(--feedback-dim); }
+    .feedback-card .agent-title     { color: var(--feedback); }
+    .feedback-card .agent-status    { background: var(--feedback-dim); color: var(--feedback); }
 
-    /* ── STATUS BADGE ── */
-    .pulse-dot {
-      display: inline-block;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--approved);
-      margin-right: 6px;
-      animation: pulse 2s infinite;
+    /* ── LOADING SKELETON ── */
+    @keyframes shimmer {
+      0%   { background-position: -600px 0; }
+      100% { background-position:  600px 0; }
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.4); }
-      50%       { opacity: 0.7; box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+
+    .skeleton {
+      border-radius: 6px;
+      height: 14px;
+      margin: 6px 0;
+      background: linear-gradient(
+        90deg,
+        var(--surface2) 25%,
+        var(--surface3) 50%,
+        var(--surface2) 75%
+      );
+      background-size: 600px 100%;
+      animation: shimmer 1.8s infinite;
     }
-    .live-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--approved);
+    .skeleton.w70 { width: 70%; }
+    .skeleton.w50 { width: 50%; }
+    .skeleton.w85 { width: 85%; }
+
+    /* ── ERROR BANNER ── */
+    .error-banner {
+      background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      color: var(--rejected);
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ── MODAL ── */
+    .modal-content {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      color: var(--text);
+      transition: background var(--transition);
+    }
+    .modal-header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+    }
+    .modal-header h5 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .btn-close {
+      filter: var(--btn-close-filter, invert(1));
+    }
+    [data-theme="light"] .btn-close { filter: none; }
+    iframe {
+      width: 100%; height: 600px;
+      border: none; border-radius: 8px;
+    }
+
+    /* ── DIVIDER ── */
+    .dash-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.75rem 0 1.5rem;
     }
 
     /* ── FOOTER ── */
     .dash-footer {
       text-align: center;
-      color: var(--muted);
-      font-size: 0.75rem;
-      padding: 2rem 0 1rem;
+      color: var(--muted2);
+      font-size: 0.72rem;
+      padding: 2rem 0 1.5rem;
+      letter-spacing: 0.06em;
     }
   </style>
 </head>
 <body>
 
-<div class="container" style="max-width:820px;">
+<div class="container" style="max-width:860px; padding: 0 1rem;">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="live-badge">
+        <span class="pulse-dot"></span>
+        Live
+      </div>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode">
+      <div class="toggle-icons">
+        <span aria-hidden="true">🌙</span>
+        <span aria-hidden="true">☀️</span>
+      </div>
+      <div class="toggle-thumb" id="toggleThumb" aria-hidden="true"></div>
+    </button>
+  </div>
 
   <!-- HEADER -->
   <div class="dash-header">
     <div class="brand">Ujima AI Loan System</div>
     <div class="subtitle">Real-time multi-agent decision dashboard</div>
-    <div class="mt-2">
-      <span class="pulse-dot"></span>
-      <span class="live-label">Live · refreshing every 10s</span>
-    </div>
+  </div>
+
+  <!-- ERROR BANNER -->
+  <div class="error-banner" id="errorBanner">
+    <span>⚠</span> Unable to fetch latest data — retrying shortly.
   </div>
 
   <!-- METRICS -->
-  <div class="row row-cols-2 row-cols-md-4 metric-row g-0 mb-4" id="metrics">
-    <div class="col p-1">
-      <div class="metric-card total">
-        <div class="metric-label">Applications</div>
-        <div class="metric-value" id="totalApps">—</div>
-      </div>
+  <div class="metric-grid" id="metrics">
+    <div class="metric-card total">
+      <span class="metric-icon">📋</span>
+      <div class="metric-label">Applications</div>
+      <div class="metric-value" id="totalApps">—</div>
     </div>
-    <div class="col p-1">
-      <div class="metric-card approved">
-        <div class="metric-label">Approved</div>
-        <div class="metric-value" id="approved">—</div>
-      </div>
+    <div class="metric-card approved">
+      <span class="metric-icon">✅</span>
+      <div class="metric-label">Approved</div>
+      <div class="metric-value" id="approved">—</div>
     </div>
-    <div class="col p-1">
-      <div class="metric-card rejected">
-        <div class="metric-label">Rejected</div>
-        <div class="metric-value" id="rejected">—</div>
-      </div>
+    <div class="metric-card rejected">
+      <span class="metric-icon">❌</span>
+      <div class="metric-label">Rejected</div>
+      <div class="metric-value" id="rejected">—</div>
     </div>
-    <div class="col p-1">
-      <div class="metric-card time">
-        <div class="metric-label">Time Saved (hrs)</div>
-        <div class="metric-value" id="timeSaved">—</div>
-      </div>
+    <div class="metric-card time">
+      <span class="metric-icon">⏱️</span>
+      <div class="metric-label">Time Saved (hrs)</div>
+      <div class="metric-value" id="timeSaved">—</div>
     </div>
   </div>
 
   <!-- APPLY BUTTON -->
   <div class="text-center mb-4">
     <button class="btn btn-apply" data-bs-toggle="modal" data-bs-target="#formModal">
-      + Apply for a Loan
+      <span>+</span> Apply for a Loan
     </button>
   </div>
+
+  <hr class="dash-divider">
 
   <!-- AGENT OUTPUTS -->
   <div class="section-heading">Agent Pipeline · Latest Application</div>
   <div class="agent-stack mb-3">
 
     <div class="agent-card scout">
-      <div class="agent-icon">🦁</div>
-      <div class="agent-body">
-        <div class="agent-title">SCOUT — Data Gatherer</div>
-        <p class="agent-text" id="scout">Awaiting data…</p>
+      <div class="agent-icon-wrap">🦁</div>
+      <div>
+        <div class="agent-header">
+          <p class="agent-title">SCOUT — Data Gatherer</p>
+          <span class="agent-status">Active</span>
+        </div>
+        <p class="agent-text" id="scout"><span class="skeleton w85"></span><span class="skeleton w70"></span><span class="skeleton w50"></span></p>
       </div>
     </div>
 
     <div class="agent-card guardian">
-      <div class="agent-icon">🛡️</div>
-      <div class="agent-body">
-        <div class="agent-title">GUARDIAN — Risk Assessor</div>
-        <p class="agent-text" id="guardian">Awaiting data…</p>
+      <div class="agent-icon-wrap">🛡️</div>
+      <div>
+        <div class="agent-header">
+          <p class="agent-title">GUARDIAN — Risk Assessor</p>
+          <span class="agent-status">Active</span>
+        </div>
+        <p class="agent-text" id="guardian"><span class="skeleton w85"></span><span class="skeleton w70"></span><span class="skeleton w50"></span></p>
       </div>
     </div>
 
     <div class="agent-card hunter">
-      <div class="agent-icon">🎯</div>
-      <div class="agent-body">
-        <div class="agent-title">HUNTER — Opportunity Report</div>
-        <p class="agent-text" id="hunter">Awaiting data…</p>
+      <div class="agent-icon-wrap">🎯</div>
+      <div>
+        <div class="agent-header">
+          <p class="agent-title">HUNTER — Opportunity Report</p>
+          <span class="agent-status">Active</span>
+        </div>
+        <p class="agent-text" id="hunter"><span class="skeleton w85"></span><span class="skeleton w70"></span><span class="skeleton w50"></span></p>
       </div>
     </div>
 
   </div>
 
+  <hr class="dash-divider">
+
   <!-- FEEDBACK -->
   <div class="section-heading">User Feedback</div>
   <div class="feedback-card mb-5">
-    <div class="agent-icon">💬</div>
-    <div class="agent-body">
-      <div class="agent-title">LATEST FEEDBACK</div>
-      <p class="agent-text" id="feedback">Awaiting data…</p>
+    <div class="agent-icon-wrap">💬</div>
+    <div>
+      <div class="agent-header">
+        <p class="agent-title">LATEST FEEDBACK</p>
+        <span class="agent-status" style="background: var(--feedback-dim); color: var(--feedback);">Latest</span>
+      </div>
+      <p class="agent-text" id="feedback"><span class="skeleton w85"></span><span class="skeleton w50"></span></p>
     </div>
   </div>
 
@@ -349,51 +642,79 @@
 </div>
 
 <!-- MODAL -->
-<div class="modal fade" id="formModal" tabindex="-1">
+<div class="modal fade" id="formModal" tabindex="-1" aria-labelledby="formModalLabel" aria-modal="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Loan Application</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <h5 class="modal-title" id="formModalLabel">Loan Application</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-2">
-        <iframe src="https://forms.gle/XzWhVsJjNWwd7ycb9"></iframe>
+        <iframe src="https://forms.gle/XzWhVsJjNWwd7ycb9" title="Loan Application Form"></iframe>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxexh-vIbB7zUQ7-VWmrL0kHq3oyps43grXfwctGOYYylHIl8__F_-fbBQdNHxlcOCD/exec";
+  /* ── THEME TOGGLE ── */
+  const html        = document.documentElement;
+  const toggleBtn   = document.getElementById('themeToggle');
+  const savedTheme  = localStorage.getItem('ujima-theme') || 'dark';
+  html.setAttribute('data-theme', savedTheme);
 
-async function loadData() {
-  try {
-    const res  = await fetch(API_URL);
-    const data = await res.json();
-    const latest    = data[data.length - 1];
-    const total     = data.length;
-    let   approved  = 0, rejected = 0;
-    data.forEach(r => {
-      if (r.Final_Status === "APPROVE") approved++;
-      if (r.Final_Status === "REJECT")  rejected++;
-    });
+  toggleBtn.addEventListener('click', () => {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('ujima-theme', next);
+  });
 
-    document.getElementById("totalApps").innerText = total;
-    document.getElementById("approved").innerText  = approved;
-    document.getElementById("rejected").innerText  = rejected;
-    document.getElementById("timeSaved").innerText = (total * 13 / 60).toFixed(1);
+  /* ── DATA LOADING ── */
+  const API_URL = "https://script.google.com/macros/s/AKfycbxexh-vIbB7zUQ7-VWmrL0kHq3oyps43grXfwctGOYYylHIl8__F_-fbBQdNHxlcOCD/exec";
+  let loaded = false;
 
-    document.getElementById("scout").innerText    = latest.Scout_Output    || "No data";
-    document.getElementById("guardian").innerText = latest.Guardian_Output || "No data";
-    document.getElementById("hunter").innerText   = latest.Hunter_Output   || "No data";
-    document.getElementById("feedback").innerText = latest.Feedback_To_User || "No data";
-  } catch (e) {
-    console.error("Load error:", e);
+  function setField(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value || 'No data available.';
   }
-}
 
-loadData();
-setInterval(loadData, 10000);
+  async function loadData() {
+    try {
+      const res  = await fetch(API_URL);
+      const data = await res.json();
+
+      const latest   = data[data.length - 1];
+      const total    = data.length;
+      let approved = 0, rejected = 0;
+      data.forEach(r => {
+        if (r.Final_Status === "APPROVE") approved++;
+        if (r.Final_Status === "REJECT")  rejected++;
+      });
+
+      document.getElementById("totalApps").textContent = total;
+      document.getElementById("approved").textContent  = approved;
+      document.getElementById("rejected").textContent  = rejected;
+      document.getElementById("timeSaved").textContent = (total * 13 / 60).toFixed(1);
+
+      setField("scout",    latest.Scout_Output);
+      setField("guardian", latest.Guardian_Output);
+      setField("hunter",   latest.Hunter_Output);
+      setField("feedback", latest.Feedback_To_User);
+
+      document.getElementById("errorBanner").style.display = "none";
+      loaded = true;
+    } catch (e) {
+      console.error("Load error:", e);
+      if (!loaded) {
+        ["scout","guardian","hunter","feedback"].forEach(id => setField(id, "Unable to load data."));
+      }
+      document.getElementById("errorBanner").style.display = "flex";
+    }
+  }
+
+  loadData();
+  setInterval(loadData, 10000);
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
