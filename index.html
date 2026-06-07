@@ -724,56 +724,64 @@
  
   /* GUARDIAN */
   function renderGuardian(raw) {
-    const el = document.getElementById("guardian");
+    var el = document.getElementById("guardian");
     if (!el) return;
-    const d = tryParseJSON(raw);
-    if (!d) { el.textContent = raw || 'No data available.'; return; }
-    const approved     = (d.decision||'').toUpperCase() === 'APPROVE';
-    const score        = parseInt(d.risk_score) || 0;
-    const decLabel     = approved ? '✅ Approved' : '❌ Not approved';
-    const color        = approved ? 'var(--approved)' : 'var(--rejected)';
-    const scoreLabel   = score >= 75 ? 'Very high risk' : score >= 50 ? 'Moderate risk' : 'Low risk';
-    let suggHTML = '';
-    if (d.handoff_note) suggHTML = `<div class="gd-suggestion"><div class="gd-sub-label">💡 Recommendation</div><p class="gd-body-text">${d.handoff_note}</p></div>`;
-    el.innerHTML = `<div class="gd-card">
-      <div class="gd-decision-row">
-        <div><div class="gd-micro">Decision</div><div class="gd-decision-value" style="color:${color};">${decLabel}</div></div>
-        <div style="text-align:right;">
-          <div class="gd-micro">Risk score</div>
-          <div class="gd-risk-bar-bg"><div class="gd-risk-bar" style="width:${Math.min(score,100)}%;background:${color};"></div></div>
-          <div class="gd-micro" style="margin-top:3px;color:${color};">${score}/100 — ${scoreLabel}</div>
-        </div>
-      </div>
-      ${d.reason ? `<div class="gd-section"><div class="gd-sub-label">🔍 Why was this decision made?</div><p class="gd-body-text">${d.reason}</p></div>` : ''}
-      ${suggHTML}
-      ${d.bias_check ? `<div class="gd-fair">⚖️ <span>${d.bias_check}</span></div>` : ''}
-    </div>`;
+    var d = tryParseJSON(raw);
+    if (d) {
+      var approved   = (d.decision||'').toUpperCase() === 'APPROVE';
+      var score      = parseInt(d.risk_score) || 0;
+      var decLabel   = approved ? '✅ Approved' : '❌ Not approved';
+      var color      = approved ? 'var(--approved)' : 'var(--rejected)';
+      var scoreLabel = score >= 75 ? 'Very high risk' : score >= 50 ? 'Moderate risk' : 'Low risk';
+      var suggHTML   = d.handoff_note ? '<div class="gd-suggestion"><div class="gd-sub-label">💡 Recommendation</div><p class="gd-body-text">' + d.handoff_note + '</p></div>' : '';
+      var reasonHTML = d.reason ? '<div class="gd-section"><div class="gd-sub-label">🔍 Why was this decision made?</div><p class="gd-body-text">' + d.reason + '</p></div>' : '';
+      var biasHTML   = d.bias_check ? '<div class="gd-fair">⚖️ <span>' + d.bias_check + '</span></div>' : '';
+      el.innerHTML =
+        '<div class="gd-card">' +
+          '<div class="gd-decision-row">' +
+            '<div><div class="gd-micro">Decision</div><div class="gd-decision-value" style="color:' + color + ';">' + decLabel + '</div></div>' +
+            '<div style="text-align:right;">' +
+              '<div class="gd-micro">Risk score</div>' +
+              '<div class="gd-risk-bar-bg"><div class="gd-risk-bar" style="width:' + Math.min(score,100) + '%;background:' + color + ';"></div></div>' +
+              '<div class="gd-micro" style="margin-top:3px;color:' + color + ';">' + score + '/100 — ' + scoreLabel + '</div>' +
+            '</div>' +
+          '</div>' +
+          reasonHTML + suggHTML + biasHTML +
+        '</div>';
+    } else {
+      el.innerHTML = '<div class="md-body">' + mdToHTML(raw) + '</div>';
+    }
   }
  
   /* SCOUT */
   function renderScout(raw) {
-    const el = document.getElementById("scout");
+    var el = document.getElementById("scout");
     if (!el) return;
-    const d = tryParseJSON(raw);
-    if (!d) { el.textContent = raw || 'No data available.'; return; }
-    const labelMap = {
-      applicant_name:'Applicant', name:'Applicant',
-      loan_amount:'Loan amount', amount:'Loan amount',
-      monthly_income:'Monthly income', income:'Monthly income',
-      repayment_period:'Repayment period', duration:'Repayment period',
-      purpose:'Purpose', loan_purpose:'Purpose',
-      occupation:'Occupation', employer:'Employer',
-      age:'Age', gender:'Gender', location:'Location', county:'County',
-      guarantors:'Guarantors', security:'Security', credit_score:'Credit score',
-    };
-    let rows = Object.entries(d).filter(([k]) => labelMap[k.toLowerCase()])
-      .map(([k,v]) => {
-        const lbl = labelMap[k.toLowerCase()];
-        const val = typeof v==='number' && (k.toLowerCase().includes('amount')||k.toLowerCase().includes('income')) ? `KES ${fmt(v)}` : v;
-        return `<div class="sc-row"><span class="sc-label">${lbl}</span><span class="sc-value">${val}</span></div>`;
+    var d = tryParseJSON(raw);
+    if (d) {
+      var labelMap = {
+        applicant_name:'Applicant', name:'Applicant',
+        loan_amount:'Loan amount', amount:'Loan amount',
+        monthly_income:'Monthly income', income:'Monthly income',
+        repayment_period:'Repayment period', duration:'Repayment period',
+        purpose:'Purpose', loan_purpose:'Purpose',
+        occupation:'Occupation', employer:'Employer',
+        age:'Age', gender:'Gender', location:'Location', county:'County',
+        guarantors:'Guarantors', security:'Security', credit_score:'Credit score',
+      };
+      var rows = Object.entries(d).filter(function([k]) { return labelMap[k.toLowerCase()]; })
+        .map(function([k,v]) {
+          var lbl = labelMap[k.toLowerCase()];
+          var val = typeof v==='number' && (k.toLowerCase().includes('amount')||k.toLowerCase().includes('income')) ? 'KES ' + fmt(v) : v;
+          return '<div class="sc-row"><span class="sc-label">' + lbl + '</span><span class="sc-value">' + val + '</span></div>';
+        }).join('');
+      if (!rows) rows = Object.entries(d).map(function([k,v]) {
+        return '<div class="sc-row"><span class="sc-label">' + k.replace(/_/g,' ') + '</span><span class="sc-value">' + v + '</span></div>';
       }).join('');
-    if (!rows) rows = Object.entries(d).map(([k,v])=>`<div class="sc-row"><span class="sc-label">${k.replace(/_/g,' ')}</span><span class="sc-value">${v}</span></div>`).join('');
-    el.innerHTML = `<div class="sc-card">${rows}</div>`;
+      el.innerHTML = '<div class="sc-card">' + rows + '</div>';
+    } else {
+      el.innerHTML = '<div class="md-body">' + mdToHTML(raw) + '</div>';
+    }
   }
  
   /* simple markdown -> HTML */
